@@ -1,0 +1,37 @@
+variant: flatcar
+version: 1.1.0
+storage:
+  links:
+    # disable docker and containerd so k3s is king
+    - path: /etc/extensions/docker-flatcar.raw
+      target: /dev/null
+      overwrite: true
+    - path: /etc/extensions/containerd-flatcar.raw
+      target: /dev/null
+      overwrite: true
+  files:
+  - path: /etc/sysupdate.d/noop.conf
+    mode: 0644
+    contents:
+      source: https://github.com/flatcar/sysext-bakery/releases/download/latest/noop.conf
+systemd:
+  units:
+    - name: systemd-sysupdate.service
+      dropins:
+        - name: sysext.conf
+          contents: |
+            [Service]
+            ExecStartPost=systemctl restart systemd-sysext
+    - name: systemd-sysupdate.timer
+      # Set this to 'true' if you want to enable the Kubernetes auto-update.
+      # NOTE: Only patches version will be pulled.
+      enabled: true
+    - name: update-engine.service
+      # Set this to 'false' if you want to enable Flatcar auto-update
+      mask: false
+    - name: locksmithd.service
+      # NOTE: To coordinate the node reboot in this context, we recommend to use Kured.
+      # kured is a kubernetes service, configured outside this butane/ignition
+      mask: true
+    - name: coreos-metadata-sshkeys@.service
+      enabled: false

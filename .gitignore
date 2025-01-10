@@ -1,0 +1,5 @@
+*.bz2
+*.ign
+*.pub
+token.txt
+.DS_Store

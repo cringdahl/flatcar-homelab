@@ -1,0 +1,26 @@
+variant: flatcar
+version: 1.1.0
+ignition:
+  config:
+    merge:
+    # prod would have remote sourced, stable dependency igns
+    - local: config.system.ign
+    - local: config.sysext.ign
+    - local: config.k3s.ign
+storage:
+  links:
+  - path: /etc/systemd/system/multi-user.target.wants/k3s.service
+    target: /usr/local/lib/systemd/system/k3s.service
+    overwrite: true
+  files:
+  - path: /etc/default/k3s
+    mode: 0644
+    contents:
+      inline: |
+        # for core user with kubectl
+        K3S_KUBECONFIG_MODE=0640
+        K3S_KUBECONFIG_GROUP=wheel
+systemd:
+  units:
+  - name: k3s.service
+    enabled: true

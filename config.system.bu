@@ -1,0 +1,57 @@
+variant: flatcar
+version: 1.1.0
+passwd:
+  users:
+  - name: core
+    ssh_authorized_keys:
+    # below gets changed by the script and your pub key
+    - ssh-rsa AAAAlookatthissshkeytho
+kernel_arguments:
+  should_exist:
+    - console=ttyAMA0,115200n8
+    - console=tty1
+    - flatcar.autologin
+    - usbcore.autosuspend=-1
+storage:
+  files:
+  - path: /etc/systemd/network/01-eth0.link
+    contents:
+      inline: |
+        [Match]
+        OriginalName=enabcm6e4ei0
+
+        [Link]
+        Name=eth0
+  - path: /etc/systemd/network/01-eth0.network
+    contents:
+      inline: |
+        [Match]
+        Name=eth0
+
+        [Network]
+        DHCP=true
+  - path: /etc/nsswitch.conf
+    overwrite: true
+    mode: 0644
+    contents:
+      inline: |
+        # /etc/nsswitch.conf:
+        # hosts now uses mdns and relies less on resolved failures
+        
+        passwd:      files usrfiles
+        shadow:      files usrfiles
+        group:       files usrfiles
+
+        hosts:       files usrfiles mdns4_minimal [NOTFOUND=return] resolve dns
+        networks:    files usrfiles dns
+
+        services:    files usrfiles
+        protocols:   files usrfiles
+        rpc:         files usrfiles
+
+        ethers:      files
+        netmasks:    files
+        netgroup:    files
+        bootparams:  files
+        automount:   files
+        aliases:     files

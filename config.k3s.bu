@@ -1,0 +1,33 @@
+variant: flatcar
+version: 1.1.0
+ignition:
+  config:
+    merge:
+    - local: config.system.ign
+    - local: config.sysext.ign
+storage:
+  links:
+    - path: /etc/extensions/k3s.raw
+      hard: false
+      target: /opt/extensions/k3s/k3s-v1.31.3+k3s1-arm64.raw
+  files:
+  - path: /etc/sysupdate.k3s.d/k3s.conf
+    mode: 0644
+    contents:
+      source: https://github.com/flatcar/sysext-bakery/releases/download/latest/k3s-v1.31.conf
+  - path: /opt/extensions/k3s/k3s-v1.31.3+k3s1-arm64.raw
+    contents:
+      source: https://github.com/flatcar/sysext-bakery/releases/download/latest/k3s-v1.31.3+k3s1-arm64.raw
+systemd:
+  units:
+    - name: systemd-sysupdate.service
+      dropins:
+        - name: k3s.conf
+          contents: |
+            [Service]
+            ExecStartPre=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/k3s.raw > /tmp/k3s"
+            ExecStartPre=/usr/lib/systemd/systemd-sysupdate -C k3s update
+            ExecStartPost=/usr/bin/sh -c "readlink --canonicalize /etc/extensions/k3s.raw > /tmp/k3s-new"
+            ExecStartPost=/usr/bin/sh -c "if ! cmp --silent /tmp/k3s /tmp/k3s-new; then touch /run/reboot-required; fi"
+    # - name: k3s.service
+    #   enabled: true

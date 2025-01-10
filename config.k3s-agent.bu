@@ -1,0 +1,30 @@
+variant: flatcar
+version: 1.1.0
+ignition:
+  config:
+    merge:
+    # prod would have remote sourced, stable dependency igns
+    - local: config.system.ign
+    - local: config.sysext.ign
+    - local: config.k3s.ign
+storage:
+  links:
+  - path: /etc/systemd/system/multi-user.target.wants/k3s-agent.service
+    target: /usr/local/lib/systemd/system/k3s-agent.service
+    overwrite: true
+  files:
+  - path: /etc/default/k3s-agent
+    mode: 0644
+    contents:
+      inline: |
+        # K3S_TOKEN="K000000t0k3n::server:d3adbeeffffffff"
+        K3S_TOKEN_FILE=/etc/rancher/k3s/token.txt
+        K3S_URL=https://n1:6443
+  - path: /etc/rancher/k3s/token.txt
+    mode: 0400
+    contents:
+      local: token.txt
+systemd:
+  units:
+  - name: k3s-agent.service
+    enabled: true
