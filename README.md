@@ -62,6 +62,12 @@ I'm sharing my flatcar-init directory between my Mac and Fedora, so running the 
 
 In addition to the below, nothing has actually been installed in this environment yet. I'm pausing this particular project in favor of other work, but revisiting will bring basic services, possibly in a separate repo.
 
+### Project Ideas
+
+* windmill.dev
+* dedicated minio cloud storage setup
+* backstage
+
 ### Configuration changes
 
 In-place updates as is are a pain. If I want a configuration change, it's either a Butane change and reinstall, or an Ignition change in `/oem` and re-run ignition on next boot.
